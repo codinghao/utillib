@@ -3,7 +3,7 @@
 
 #include "Net.h"
 #include "NetAcceptor.h"
-#include "NetClient.h"
+#include "NetSession.h"
 
 class NetService
 {
@@ -40,7 +40,7 @@ public:
 	    }
 	}
     	
-	NetClient* cli = new NetClient(m_Service, sock, addr);
+	NetSession* cli = new NetSession(m_Service, sock, addr);
 
 	EventHandle eventHandle = EventHandle(this, &NetService::OnAccept);
     	m_Acceptor.AddAcceptEvent(eventHandle);
@@ -58,7 +58,7 @@ private:
     NetEpoll m_Service;
     NetAcceptor m_Acceptor;
 
-    std::vector<NetClient*> m_ClientList;
+    std::vector<NetSession*> m_ClientList;
 
 };
 

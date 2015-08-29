@@ -50,12 +50,18 @@ struct DataBuffer
 	m_Off = 0;
     }
 
+    void Clear()
+    {
+	m_Length = m_Off = 0;
+    }
+
     void Free()
     {
 	if (m_Data != NULL)
 	    delete m_Data;
 
 	m_Data = NULL;
+	m_Size = m_Length = m_Off = 0;
     }
     
     char* m_Data;

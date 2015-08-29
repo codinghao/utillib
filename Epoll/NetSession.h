@@ -1,15 +1,14 @@
 #ifndef _NET_CLIENT_H_
 #define _NET_CLIENT_H_
 
-#include "DataBuffer.h"
-#include "WriteBuffer.h"
+#include "NetBuffer.h"
 
 #define MAX_CLIENT_REQ_DATA 64*1024*1024
 
-class NetClient
+class NetSession
 {
 public:
-    NetClient(NetEpoll& service, NetSocket& socket, PeerAddr& addr)
+    NetSession(NetEpoll& service, NetSocket& socket, PeerAddr& addr)
         : m_PeerAddr(addr)
         , m_Service(service)
     {
@@ -18,7 +17,7 @@ public:
         AddReadEvent();
     }
 
-    ~NetClient()
+    ~NetSession()
     {}
 
     void ProcessBuffer()
@@ -85,6 +84,7 @@ public:
             if (m_ReadBuffer.Remain() > 0)
             {
                 ProcessBuffer();
+		m_ReadBuffer.Clear();
                 AddReadEvent();
                 break;
             }
@@ -97,7 +97,7 @@ public:
 
     void OnWrite(Event* ev)
     {
-        ReadBufferHandle handle = ReadBufferHandle(this, &NetClient::Write);
+        ReadBufferHandle handle = ReadBufferHandle(this, &NetSession::Write);
         m_WriteBuffer.Read(&handle);
 
         if (!m_WriteBuffer.Empty())
@@ -106,13 +106,13 @@ public:
 
     void AddReadEvent()
     {
-        m_Event.m_ReadHandle = EventHandle(this, &NetClient::OnRead);
+        m_Event.m_ReadHandle = EventHandle(this, &NetSession::OnRead);
         m_Service.AddEvent(m_Event, EVENT_READABLE);
     }
 
     void AddWriteEvent()
     {
-        m_Event.m_WriteHandle = EventHandle(this, &NetClient::OnWrite);
+        m_Event.m_WriteHandle = EventHandle(this, &NetSession::OnWrite);
         m_Service.AddEvent(m_Event, EVENT_WRITEABLE);
     }
 
@@ -127,7 +127,7 @@ private:
     Event m_Event;
     PeerAddr m_PeerAddr;
     NetEpoll& m_Service;
-    DataBuffer m_ReadBuffer;
+    ReadBuffer m_ReadBuffer;
     WriteBuffer m_WriteBuffer;
 };
 
