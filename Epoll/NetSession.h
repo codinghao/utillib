@@ -14,6 +14,9 @@ public:
     {
         m_Event.m_Socket = socket;
         m_Event.m_Socket.SetNonBlock();
+        m_Event.m_ReadHandle = EventHandle(this, &NetSession::OnRead);
+        m_Event.m_WriteHandle = EventHandle(this, &NetSession::OnWrite);
+
         AddReadEvent();
     }
 
@@ -106,13 +109,11 @@ public:
 
     void AddReadEvent()
     {
-        m_Event.m_ReadHandle = EventHandle(this, &NetSession::OnRead);
         m_Service.AddEvent(m_Event, EVENT_READABLE);
     }
 
     void AddWriteEvent()
     {
-        m_Event.m_WriteHandle = EventHandle(this, &NetSession::OnWrite);
         m_Service.AddEvent(m_Event, EVENT_WRITEABLE);
     }
 

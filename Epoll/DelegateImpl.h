@@ -131,7 +131,7 @@ public:
     Delegate& operator = (const std::pair<T, TFunctor>& _pair)
     {
         FreeDelegate();
-        m_pImpl = new DelegateImpl<std::pair<T, TFunctor> >(_pair);
+        m_pImpl = new DelegateImplX<T, TFunctor>(_pair);
 
         return *this;
     }
