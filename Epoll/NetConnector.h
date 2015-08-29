@@ -12,6 +12,7 @@ public:
         m_Event.m_Socket.Create();
         m_Event.m_Socket.SetNonBlock();
         m_Event.m_WriteHandle = EventHandle(this, &NetConnector::OnConnected);
+        m_Event.m_ReadHandle = EventHandle(this, &NetConnector::OnConnected);
     }
 
     ~NetConnector()
@@ -25,7 +26,7 @@ public:
 	{
 	    if (errno != EINPROGRESS)
 	    {
-		std::cout << "Connect fail!" << std::endl;
+		Close();
 	    }	
 	}
 
@@ -36,14 +37,17 @@ public:
     {
 	if (m_Event.m_Socket.GetSockErr())
 	{
-	    std::cout << strerror(errno);
-	    m_Service.DelEvent(m_Event, EVENT_READABLE|EVENT_WRITEABLE);
-	    std::cout << "Connect fail!" << std::endl;
+	    Close();
 	}
 	else
 	{
 	    std::cout << "Connect success!" << std::endl;
 	}
+    }
+
+    void Close()
+    {
+	m_Event.m_Socket.Close();
     }
 
 private:
