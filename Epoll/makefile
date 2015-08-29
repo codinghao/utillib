@@ -1,4 +1,3 @@
-PROGRAM = RoseDB
 SRCDIRS = .
 SRCEXTS = .cpp
 
@@ -10,13 +9,16 @@ OBJS = $(patsubst %.cpp,%.o,$(SRCNAMES))
 
 .PHONY : all
 
-all : $(PROGRAM)
+all : ServerTest ClientTest
 
-$(PROGRAM) : $(OBJS)
-	g++ -o $(PROGRAM) $(OBJS) $(LDFLAGS)
+ServerTest : ServerTest.o
+	g++ -o ServerTest ServerTest.o  $(LDFLAGS)
+ClientTest : ClientTest.o
+	g++ -o ClientTest ClientTest.o  $(LDFLAGS)
 %.o : %.cpp
 	g++ -c $(CXXFLAGS) $< -o $@
 clean:
 	rm -f $(OBJS)
-	rm -f $(PROGRAM)
+	rm -f ServerTest
+	rm -f ClientTest
 

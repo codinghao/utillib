@@ -1,19 +1,19 @@
 #ifndef _NET_ACCEPTOR_H_
 #define _NET_ACCEPTOR_H_
 
-#include "Net.h"
-#include "NetEpoll.h"
+#include "NetService.h"
 
 class NetAcceptor
 {
 public:
-    NetAcceptor(NetEpoll& service)
+    NetAcceptor(NetService& service)
         : m_Service(service)
     {
     }
 
     ~NetAcceptor()
     {
+	m_Event.m_Socket.Close();
     }
 
     int Create(PeerAddr& addr, int maxListen)
@@ -55,7 +55,7 @@ public:
     }
 
 private:
-    NetEpoll& m_Service;
+    NetService& m_Service;
     Event m_Event;
 };
 

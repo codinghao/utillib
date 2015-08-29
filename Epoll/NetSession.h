@@ -8,7 +8,7 @@
 class NetSession
 {
 public:
-    NetSession(NetEpoll& service, NetSocket& socket, PeerAddr& addr)
+    NetSession(NetService& service, NetSocket& socket, PeerAddr& addr)
         : m_PeerAddr(addr)
         , m_Service(service)
     {
@@ -132,7 +132,7 @@ public:
 private:
     Event m_Event;
     PeerAddr m_PeerAddr;
-    NetEpoll& m_Service;
+    NetService& m_Service;
     ReadBuffer m_ReadBuffer;
     WriteBuffer m_WriteBuffer;
 };

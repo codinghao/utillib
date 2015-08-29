@@ -7,14 +7,15 @@
  *
  */
 
-#include "RoseDB.h"
+#include "NetServer.h"
 
 int main(int argc, char* argv[])
 {
-    NetService srv;
+    NetService service;
+    NetServer server(service);
     PeerAddr peer("0.0.0.0", 5525);
-    srv.Start(peer);
-    srv.Run();
+    server.Start(peer);
+    service.Run();
 
     return 0;
 }

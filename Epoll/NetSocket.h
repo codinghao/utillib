@@ -39,6 +39,16 @@ public:
         return connect(m_Handle, peer.ToSockaddr(), sizeof(peer));
     }
 
+    int GetSockErr()
+    {
+	int sockErr = 0;
+	socklen_t errLen = sizeof(sockErr);
+	if (getsockopt(m_Handle, SOL_SOCKET, SO_ERROR, &sockErr, &errLen) == -1)
+	    sockErr = errno;
+
+	return sockErr;
+    }
+
     void Close()
     {
         if (!Invalid())
