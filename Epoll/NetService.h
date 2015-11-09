@@ -21,7 +21,7 @@ public:
     void Start(PeerAddr& addr)
     {
 	m_Service.Create();
-	m_Acceptor.Create(addr, 1000);
+    m_Acceptor.Create(addr, 1000);
     	EventHandle eventHandle = EventHandle(this, &NetService::OnAccept);
     	m_Acceptor.AddAcceptEvent(eventHandle);
     }
