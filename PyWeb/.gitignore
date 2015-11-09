@@ -1,0 +1,4 @@
+#ignore directories
+#ignore files
+*.pyc
+*.bak

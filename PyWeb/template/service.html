@@ -1,0 +1,23 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <title> 服务器重启 </title>
+ </head>
+<script>
+	function restart_service()
+	{
+		alert("服务器启动中……");
+	}
+</script>
+<body>
+   <form action="service_status" method="get">
+   <select style="width:400px">
+      <option value ="200">http://192.168.1.200:8080/newgame/login200.html</option>
+	  <option value ="vn200">http://192.168.1.200:8080/newgame_yue/game.php</option>
+	  <option value="66uu">http://www.66uu.cn:8080/newgame/login.html</option>
+   </select>
+   <input type="submit" value="Submit"/>
+   </form>
+</body>
+</html>
