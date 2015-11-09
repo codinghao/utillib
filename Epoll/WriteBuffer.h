@@ -1,7 +1,11 @@
 #ifndef _WRITE_BUFFER_H_
 #define _WRITE_BUFFER_H_
 
+#include "Delegate.h"
+
 #define WRITE_BUFFER_UNIT 4*1024
+
+typedef Delegate<int (char*, uint len)> ReadBufferHandle;
 
 class WriteBuffer
 {
@@ -19,7 +23,17 @@ public:
                 delete [] m_Data;
         }
 
-        uint Remain() { return m_Size - m_Len; }
+        uint LeftBuffSize() { return m_Size - m_Len; }
+        uint LeftDataLen() { return m_Len - m_Off; }
+
+        void Write(const char* data, uint len)
+        {
+            if (len > LeftBuffSize())
+                return;
+
+            memcpy(m_Data, data, len);
+            m_Len += len;
+        }
 
         char* m_Data;
         uint m_Size;
@@ -28,10 +42,7 @@ public:
     };
 
     WriteBuffer() 
-        : m_Tail(NULL)
     {
-        m_Tail = new Buffer();
-        m_BufferList.push_back(m_Tail);
     }
 
     ~WriteBuffer()
@@ -42,11 +53,49 @@ public:
 
     void Write(const char* data, uint len)
     {
-        assert(m_Tail != NULL);
+        Buffer* buffer = NULL;
+        
+        if (m_BufferList.empty())
+            buffer = m_BufferList.front();
+        else
+            m_BufferList.push_back(new Buffer());
+
+        uint left = buffer->LeftBuffSize();
+        if (left > len)
+        {
+            buffer->Write(data, len);
+        }
+        else
+        {
+            buffer->Write(data, left);
+            Write(data, len - left);
+        }
+    }
+
+    bool Empty() { return m_BufferList.empty(); }
+
+    void Read(ReadBufferHandle* readHandle)
+    {
+        while(!m_BufferList.empty())
+        {
+            Buffer* buffer = m_BufferList.front();
+            if (buffer->LeftDataLen() > 0)
+            {
+                int readLen = (*readHandle)(buffer->m_Data + buffer->m_Off, buffer->LeftDataLen());
+                if (readLen <= 0)
+                    break;
+
+                buffer->m_Off += readLen;
+                if (buffer->LeftDataLen() > 0)
+                    break;
+            }
+
+            m_BufferList.pop_front();
+            delete buffer;
+        }
     }
 
 private:
-    Buffer* m_Tail;
     std::deque<Buffer*> m_BufferList;
 };
 

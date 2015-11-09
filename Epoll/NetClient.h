@@ -2,6 +2,7 @@
 #define _NET_CLIENT_H_
 
 #include "DataBuffer.h"
+#include "WriteBuffer.h"
 
 #define MAX_CLIENT_REQ_DATA 64*1024*1024
 
@@ -22,22 +23,30 @@ public:
 
     void ProcessBuffer()
     {
-        m_ReadBuffer.m_Data[m_ReadBuffer.m_Length] = '\0';
-
-        std::cout << m_ReadBuffer.m_Data << std::endl;
+        Send(m_ReadBuffer.m_Data, m_ReadBuffer.m_Length);
     }
 
     void Send(char* data, uint len)
     {
+        if (m_WriteBuffer.Empty())
+        {
+            int writeLen = Write(data, len);
+            if (writeLen == -1 || (uint)writeLen == len)
+                return ;
 
+            len -= writeLen;
+        }
+
+        m_WriteBuffer.Write(data, len);
+        AddWriteEvent();
     }
 
-    void OnRead(Event* ev)
+    int Write(char* data, uint len)
     {
-        for(;;)
+        for (;;)
         {
-            int ret = m_Event.m_Socket.Read(m_ReadBuffer.m_Data, m_ReadBuffer.Remain());
-            if (ret == -1)
+            int writeLen = m_Event.m_Socket.Write(data, len);
+            if (writeLen == -1)
             {
                 if (errno == EAGAIN || errno == EINTR)
                     continue;
@@ -46,8 +55,28 @@ public:
                 break;
             }
 
-            m_ReadBuffer.m_Length += ret;
-            if (m_ReadBuffer.m_Length >= MAX_CLIENT_REQ_DATA || ret == 0)
+            return writeLen;
+        }
+
+        return -1;
+    }
+
+    void OnRead(Event* ev)
+    {
+        for(;;)
+        {
+            int readLen = m_Event.m_Socket.Read(m_ReadBuffer.m_Data, m_ReadBuffer.Remain());
+            if (readLen == -1)
+            {
+                if (errno == EAGAIN || errno == EINTR)
+                    continue;
+
+                Close();
+                break;
+            }
+
+            m_ReadBuffer.m_Length += readLen;
+            if (readLen == 0 || m_ReadBuffer.m_Length >= MAX_CLIENT_REQ_DATA)
             {
                 Close();
                 break;
@@ -68,7 +97,11 @@ public:
 
     void OnWrite(Event* ev)
     {
+        ReadBufferHandle handle = ReadBufferHandle(this, &NetClient::Write);
+        m_WriteBuffer.Read(&handle);
 
+        if (!m_WriteBuffer.Empty())
+            AddWriteEvent();
     }
 
     void AddReadEvent()
@@ -88,8 +121,6 @@ public:
         m_Service.DelEvent(m_Event, EVENT_READABLE);
         m_Service.DelEvent(m_Event, EVENT_WRITEABLE);
         m_Event.m_Socket.Close();
-
-        delete this;
     }
 
 private:
@@ -97,7 +128,7 @@ private:
     PeerAddr m_PeerAddr;
     NetEpoll& m_Service;
     DataBuffer m_ReadBuffer;
-    DataBuffer m_WriteBuffer;
+    WriteBuffer m_WriteBuffer;
 };
 
 #endif
