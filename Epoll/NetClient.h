@@ -48,7 +48,7 @@ public:
 
 
 	    m_ReadBuffer.m_Length += ret;
-	    if (m_ReadBuffer.m_Length >= MAX_CLIENT_REQ_DATA)
+	    if (m_ReadBuffer.m_Length >= MAX_CLIENT_REQ_DATA || ret == 0)
 	    {
 		Close();
 		break;

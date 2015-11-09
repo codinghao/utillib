@@ -43,7 +43,7 @@ private:
         DelegateImplX(std::pair<T, TFunctor> _functor)
             : m_Functor(_functor)
         {}
-
+        
         DelegateImplBase* Clone()
         {
             return new DelegateImplX<T, TFunctor>(m_Functor);
