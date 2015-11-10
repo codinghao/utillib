@@ -87,7 +87,7 @@ public:
             if (m_ReadBuffer.Remain() > 0)
             {
                 ProcessBuffer();
-		m_ReadBuffer.Clear();
+                m_ReadBuffer.Clear();
                 AddReadEvent();
                 break;
             }
@@ -105,6 +105,11 @@ public:
 
         if (!m_WriteBuffer.Empty())
             AddWriteEvent();
+    }
+
+    void OnConnected(Event* ev)
+    {
+
     }
 
     void AddReadEvent()

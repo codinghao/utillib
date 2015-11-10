@@ -80,11 +80,18 @@ public:
             for (int i = 0; i < evNum; ++ i)
             {
                 Event* ev = (Event*)m_EpollEvent[i].data.ptr;
-                if (m_EpollEvent[i].events & EPOLLIN & ev->m_Mask)
+                int mask = EVENT_NONE;
+
+                if (m_EpollEvent[i].events & EPOLLIN)  mask |= EVENT_READABLE;
+                if (m_EpollEvent[i].events & EPOLLOUT) mask |= EVENT_WRITEABLE;
+                if (m_EpollEvent[i].events & EPOLLERR) mask |= EVENT_WRITEABLE;
+                if (m_EpollEvent[i].events & EPOLLHUP) mask |= EVENT_WRITEABLE;
+
+                if (mask & EVENT_READABLE & ev->m_Mask)
                 {
                     ev->m_ReadHandle(ev);
                 }
-                if (m_EpollEvent[i].events & EPOLLOUT & ev->m_Mask)
+                if (mask & EVENT_WRITEABLE & ev->m_Mask)
                 {
                     ev->m_WriteHandle(ev);
                 }

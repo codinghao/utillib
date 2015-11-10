@@ -8,36 +8,43 @@
 class NetSocket
 {
 public:
-    NetSocket() : m_Handle(INVALID_SOCKET)
+    NetSocket() 
+        : m_Handle(INVALID_SOCKET)
     {
     }
 
     ~NetSocket()
     {
+
     }
 
     void Create()
     {
-	if ((m_Handle = socket(AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET) 
-	    fprintf(stderr, "Create socket faild!, err:%s", strerror(errno));
+        if ((m_Handle = socket(AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET) 
+            fprintf(stderr, "Create socket faild!, err:%s", strerror(errno));
     }
-    
+
     int Read(char* data, uint len)
     {
-	return read(m_Handle, data, len);
+        return read(m_Handle, data, len);
     }
 
     int Write(char* data, uint len)
     {
-	return write(m_Handle, data, len);
+        return write(m_Handle, data, len);
+    }
+
+    int Connect(PeerAddr& peer)
+    {
+        return connect(m_Handle, peer.ToSockaddr(), sizeof(peer));
     }
 
     void Close()
     {
-	if (!Invalid())
-	    close(m_Handle);
+        if (!Invalid())
+            close(m_Handle);
 
-	m_Handle = INVALID_SOCKET;
+        m_Handle = INVALID_SOCKET;
     }
 
     int Native() { return m_Handle; }
@@ -46,12 +53,12 @@ public:
 
     void SetNonBlock()
     {
-	int opt = fcntl(m_Handle, F_GETFL);
-	if (opt != -1)
-	{
-	    opt |= O_NONBLOCK;
-	    fcntl(m_Handle, F_SETFL, opt);
-	}
+        int opt = fcntl(m_Handle, F_GETFL);
+        if (opt != -1)
+        {
+            opt |= O_NONBLOCK;
+            fcntl(m_Handle, F_SETFL, opt);
+        }
     }
 
 private:
