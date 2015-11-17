@@ -104,7 +104,9 @@ public:
 
     R operator () (FUNCTIONS_PARAM)
     {
-        return m_pImpl->Invoke(FUNCTIONS_ARG);
+        if (m_pImpl != NULL)
+            return m_pImpl->Invoke(FUNCTIONS_ARG);
+        return R();
     }
 
     Delegate& operator = (const Delegate& _delegate)

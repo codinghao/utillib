@@ -21,6 +21,7 @@ public:
         m_Event.m_Socket.Create();
 
         m_Event.m_Socket.SetNonBlock();
+        m_Event.m_Socket.SetReuseAddr();
 
         if (bind(m_Event.m_Socket.Native(), addr.ToSockaddr(), sizeof(addr)) == -1)
         {

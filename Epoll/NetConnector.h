@@ -17,37 +17,39 @@ public:
 
     ~NetConnector()
     {
-
+        Close();
     }
 
     void Connect(PeerAddr& peer)
     {
         if(m_Event.m_Socket.Connect(peer) == -1)
-	{
-	    if (errno != EINPROGRESS)
 	    {
-		Close();
-	    }	
-	}
+	        if (errno != EINPROGRESS)
+	        {
+		        Close();
+	        }	
+	    }
 
         m_Service.AddEvent(m_Event, EVENT_WRITEABLE);
     }
 
     void OnConnected(Event* ev)
     {
-	if (m_Event.m_Socket.GetSockErr())
-	{
-	    Close();
-	}
-	else
-	{
-	    std::cout << "Connect success!" << std::endl;
-	}
+	    if (m_Event.m_Socket.GetSockErr())
+	    {
+            std::cout << "Connect faild!" << std::endl;
+	        Close();
+	    }
+	    else
+	    {
+	        std::cout << "Connect success!" << std::endl;
+            m_Service.DelEvent(m_Event, EVENT_WRITEABLE|EVENT_READABLE);
+	    }
     }
 
     void Close()
     {
-	m_Event.m_Socket.Close();
+	    m_Event.m_Socket.Close();
     }
 
 private:
