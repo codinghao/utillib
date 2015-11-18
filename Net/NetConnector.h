@@ -11,8 +11,6 @@ public:
     {
         m_Event.m_Socket.Create();
         m_Event.m_Socket.SetNonBlock();
-        m_Event.m_WriteHandle = EventHandle(this, &NetConnector::OnConnected);
-        m_Event.m_ReadHandle = EventHandle(this, &NetConnector::OnConnected);
     }
 
     ~NetConnector()
@@ -30,6 +28,7 @@ public:
 	        }	
 	    }
 
+        m_Event.m_WriteHandle = EventHandle(this, &NetConnector::OnConnected);
         m_Service.AddEvent(m_Event, EVENT_WRITEABLE);
     }
 
@@ -43,7 +42,7 @@ public:
 	    else
 	    {
 	        std::cout << "Connect success!" << std::endl;
-            m_Service.DelEvent(m_Event, EVENT_WRITEABLE|EVENT_READABLE);
+            m_Service.DelEvent(m_Event, EVENT_WRITEABLE);
 	    }
     }
 

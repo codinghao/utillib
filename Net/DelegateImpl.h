@@ -10,6 +10,7 @@ private:
     class DelegateImplBase
     {
     public:
+        virtual ~DelegateImplBase(){}
         virtual DelegateImplBase* Clone() = 0;
         virtual R Invoke(FUNCTIONS_PARAM) = 0;
     };
