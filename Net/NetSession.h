@@ -5,6 +5,9 @@
 
 #define MAX_CLIENT_REQ_DATA 64*1024*1024
 
+class NetSession;
+typedef Delegate<uint (NetSession*, char*, uint)> SessionHandle;
+
 class NetSession
 {
 public:
@@ -22,11 +25,6 @@ public:
 
     ~NetSession()
     {}
-
-    void ProcessBuffer()
-    {
-        Send(m_ReadBuffer.m_Data, m_ReadBuffer.m_Length);
-    }
 
     void Send(char* data, uint len)
     {
@@ -53,7 +51,7 @@ public:
                 if (errno == EAGAIN || errno == EINTR)
                     continue;
 
-                Close();
+                OnConnectBroken();
                 break;
             }
 
@@ -73,21 +71,21 @@ public:
                 if (errno == EAGAIN || errno == EINTR)
                     continue;
 
-                Close();
+                OnConnectBroken();
                 break;
             }
 
             m_ReadBuffer.m_Length += readLen;
             if (readLen == 0 || m_ReadBuffer.m_Length >= MAX_CLIENT_REQ_DATA)
             {
-                Close();
+                OnConnectBroken();
                 break;
             }
 
             if (m_ReadBuffer.Remain() > 0)
             {
-                ProcessBuffer();
-                m_ReadBuffer.Clear();
+                m_ReadBuffer.m_Off += this->m_OnRead(this, m_ReadBuffer.m_Data, m_ReadBuffer.m_Length);
+                m_ReadBuffer.ResetMem();
                 AddReadEvent();
                 break;
             }
@@ -105,11 +103,8 @@ public:
 
         if (!m_WriteBuffer.Empty())
             AddWriteEvent();
-    }
 
-    void OnConnected(Event* ev)
-    {
-
+        this->m_OnWrite(this, NULL, 0);
     }
 
     void AddReadEvent()
@@ -122,6 +117,12 @@ public:
         m_Service.AddEvent(m_Event, EVENT_WRITEABLE);
     }
 
+    void OnConnectBroken()
+    {
+        Close();
+        this->m_OnConnectBroken(this, NULL, 0);
+    }
+
     void Close()
     {
         m_Service.DelEvent(m_Event, EVENT_READABLE);
@@ -129,12 +130,19 @@ public:
         m_Event.m_Socket.Close();
     }
 
+    void BindConnectBroken(SessionHandle& handle) { m_OnConnectBroken = handle; }
+    void BindOnRead(SessionHandle& handle) { m_OnRead = handle; }
+    void BindOnWrite(SessionHandle& handle) { m_OnWrite = handle; }
+
 private:
     Event m_Event;
     PeerAddr m_PeerAddr;
     NetService& m_Service;
     ReadBuffer m_ReadBuffer;
     WriteBuffer m_WriteBuffer;
+    SessionHandle m_OnConnectBroken;
+    SessionHandle m_OnRead;
+    SessionHandle m_OnWrite;
 };
 
 #endif

@@ -3,6 +3,9 @@
 
 #include "NetService.h"
 
+class NetConnector;
+typedef Delegate<void (NetConnector*)> ConnectorHandle;
+
 class NetConnector
 {
 public:
@@ -23,9 +26,7 @@ public:
         if(m_Event.m_Socket.Connect(peer) == -1)
 	    {
 	        if (errno != EINPROGRESS)
-	        {
-		        Close();
-	        }	
+                OnConnectFaild();
 	    }
 
         m_Event.m_WriteHandle = EventHandle(this, &NetConnector::OnConnected);
@@ -36,14 +37,19 @@ public:
     {
 	    if (m_Event.m_Socket.GetSockErr())
 	    {
-            std::cout << "Connect faild!" << std::endl;
-	        Close();
+            OnConnectFaild();
 	    }
 	    else
 	    {
-	        std::cout << "Connect success!" << std::endl;
             m_Service.DelEvent(m_Event, EVENT_WRITEABLE);
+            m_OnConnectedHandle(this);
 	    }
+    }
+
+    void OnConnectFaild()
+    {
+        Close();
+        m_OnConnectFaildHandle(this);
     }
 
     void Close()
@@ -51,9 +57,16 @@ public:
 	    m_Event.m_Socket.Close();
     }
 
+    void BindConnected(ConnectorHandle& handle) { m_OnConnectedHandle = handle; }
+    void BindConnectFaild(ConnectorHandle& handle) { m_OnConnectFaildHandle = handle; }
+
+    NetSocket& GetSocket() { return m_Event.m_Socket; }
+
 private:
     Event m_Event;
     NetService& m_Service;
+    ConnectorHandle m_OnConnectedHandle;
+    ConnectorHandle m_OnConnectFaildHandle;
 };
 
 #endif
