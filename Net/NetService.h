@@ -3,6 +3,7 @@
 
 #include "Net.h"
 #include "NetEpoll.h"
+#include "NetTimer.h"
 
 class NetService
 {
@@ -17,19 +18,36 @@ public:
         Exit();
     }
 
-    void AddEvent(Event& ev, int mask)
+    void AddEvent(SocketEvent& ev, int mask)
     {
         m_Service.AddEvent(ev, mask);
     }
 
-    void DelEvent(Event& ev, int mask)
+    void AddEvent(TimerEvent& ev, int timeout)
+    {
+	m_Timer.AddTimer(ev, timeout);
+    }
+
+    void DelEvent(SocketEvent& ev, int mask)
     {
         m_Service.DelEvent(ev, mask);
     }
 
+    void DelEvent(TimerEvent& ev)
+    {
+	m_Timer.DelTimer(ev);
+    }
+
     void Run()
     {
-        m_Service.ProcessEvent();
+	for(;;)
+	{
+	    int timeout = m_Timer.GetNearestTime();
+	    if(m_Service.EpollOnce(timeout) < 0)
+		break;
+
+	    m_Timer.ProcessTimer();
+	}
     }
 
     void Exit()
@@ -38,7 +56,7 @@ public:
     }
 private:
     NetEpoll m_Service;
+    NetTimer m_Timer;
 };
-
 
 #endif

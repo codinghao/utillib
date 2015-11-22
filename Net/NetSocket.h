@@ -73,11 +73,11 @@ public:
 
     bool SetReuseAddr()
     {
-	    int opt = 1;
-	    if (setsockopt(m_Handle, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
-		    return false;
+	int opt = 1;
+	if (setsockopt(m_Handle, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
+	    return false;
 
-	    return true;
+	return true;
     }
 private:
     int m_Handle;

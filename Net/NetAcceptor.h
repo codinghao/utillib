@@ -57,7 +57,7 @@ public:
 
 private:
     NetService& m_Service;
-    Event m_Event;
+    SocketEvent m_Event;
 };
 
 #endif

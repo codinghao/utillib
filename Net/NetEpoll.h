@@ -36,7 +36,7 @@ public:
         m_EpollFd = -1;
     }
 
-    void AddEvent(Event& ev, int mask)
+    void AddEvent(SocketEvent& ev, int mask)
     {
         epoll_event epollEvent = {0, {&ev}};
 
@@ -51,7 +51,7 @@ public:
         epoll_ctl(m_EpollFd, op, ev.m_Socket.Native(), &epollEvent);
     }
 
-    void DelEvent(Event& ev, int mask)
+    void DelEvent(SocketEvent& ev, int mask)
     {
         epoll_event epollEvent = {0, {&ev}};
 
@@ -67,37 +67,37 @@ public:
             epoll_ctl(m_EpollFd, EPOLL_CTL_MOD, ev.m_Socket.Native(), &epollEvent);
     }
 
-    int ProcessEvent()
+    int EpollOnce(int timeout)
     {
-        for(;;)
-        {
-            int evNum = epoll_wait(m_EpollFd, m_EpollEvent, m_EventNum, 500);
-            if (evNum < 0)
-            {
-                return 0;
-            }
+	int evNum = epoll_wait(m_EpollFd, m_EpollEvent, m_EventNum, timeout);
+	if (evNum < 0)
+	{
+	    return evNum;
+	}
 
-            for (int i = 0; i < evNum; ++ i)
-            {
-                Event* ev = (Event*)m_EpollEvent[i].data.ptr;
-                int mask = EVENT_NONE;
+	for (int i = 0; i < evNum; ++ i)
+	{
+	    SocketEvent* ev = (SocketEvent*)m_EpollEvent[i].data.ptr;
+	    int mask = EVENT_NONE;
 
-                if (m_EpollEvent[i].events & EPOLLIN)  mask |= EVENT_READABLE;
-                if (m_EpollEvent[i].events & EPOLLOUT) mask |= EVENT_WRITEABLE;
-                if (m_EpollEvent[i].events & EPOLLERR) mask |= EVENT_WRITEABLE;
-                if (m_EpollEvent[i].events & EPOLLHUP) mask |= EVENT_WRITEABLE;
+	    if (m_EpollEvent[i].events & EPOLLIN)  mask |= EVENT_READABLE;
+	    if (m_EpollEvent[i].events & EPOLLOUT) mask |= EVENT_WRITEABLE;
+	    if (m_EpollEvent[i].events & EPOLLERR) mask |= EVENT_WRITEABLE;
+	    if (m_EpollEvent[i].events & EPOLLHUP) mask |= EVENT_WRITEABLE;
 
-                if (mask & EVENT_READABLE & ev->m_Mask)
-                {
-                    ev->m_ReadHandle(ev);
-                }
-                if (mask & EVENT_WRITEABLE & ev->m_Mask)
-                {
-                    ev->m_WriteHandle(ev);
-                }
-            }
-        }
+	    if (mask & EVENT_READABLE & ev->m_Mask)
+	    {
+		ev->m_ReadHandle(ev);
+	    }
+	    if (mask & EVENT_WRITEABLE & ev->m_Mask)
+	    {
+		ev->m_WriteHandle(ev);
+	    }
+	}
+
+	return evNum;
     }
+
 private:
     int m_EpollFd;
     int m_EventNum;    

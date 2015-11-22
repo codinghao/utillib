@@ -26,7 +26,7 @@ public:
     ~NetSession()
     {}
 
-    void Send(char* data, uint len)
+    void Send(const char* data, uint len)
     {
         if (m_WriteBuffer.Empty())
         {
@@ -41,11 +41,11 @@ public:
         AddWriteEvent();
     }
 
-    int Write(char* data, uint len)
+    int Write(const char* data, uint len)
     {
         for (;;)
         {
-            int writeLen = m_Event.m_Socket.Write(data, len);
+            int writeLen = m_Event.m_Socket.Write(const_cast<char*>(data), len);
             if (writeLen == -1)
             {
                 if (errno == EAGAIN || errno == EINTR)
@@ -61,7 +61,7 @@ public:
         return -1;
     }
 
-    void OnRead(Event* ev)
+    void OnRead(SocketEvent* ev)
     {
         for(;;)
         {
@@ -96,7 +96,7 @@ public:
         }
     }
 
-    void OnWrite(Event* ev)
+    void OnWrite(SocketEvent* ev)
     {
         ReadBufferHandle handle = ReadBufferHandle(this, &NetSession::Write);
         m_WriteBuffer.Read(&handle);
@@ -135,7 +135,7 @@ public:
     void BindOnWrite(SessionHandle& handle) { m_OnWrite = handle; }
 
 private:
-    Event m_Event;
+    SocketEvent m_Event;
     PeerAddr m_PeerAddr;
     NetService& m_Service;
     ReadBuffer m_ReadBuffer;

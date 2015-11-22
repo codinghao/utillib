@@ -16,6 +16,7 @@
 
 #include <sys/socket.h>
 #include <sys/epoll.h>
+#include <sys/time.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
@@ -23,6 +24,8 @@
 #include <errno.h>
 #include <string.h>
 
+
+typedef long long          longlong;
 typedef unsigned char      uchar;
 typedef unsigned int       uint;
 typedef unsigned long      ulong;

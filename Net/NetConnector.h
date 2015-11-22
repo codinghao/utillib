@@ -10,51 +10,51 @@ class NetConnector
 {
 public:
     NetConnector(NetService& service)
-        : m_Service(service)
+	: m_Service(service)
     {
-        m_Event.m_Socket.Create();
-        m_Event.m_Socket.SetNonBlock();
+	m_Event.m_Socket.Create();
+	m_Event.m_Socket.SetNonBlock();
     }
 
     ~NetConnector()
     {
-        Close();
+	Close();
     }
 
     void Connect(PeerAddr& peer)
     {
-        if(m_Event.m_Socket.Connect(peer) == -1)
-	    {
-	        if (errno != EINPROGRESS)
-                OnConnectFaild();
-	    }
+	if(m_Event.m_Socket.Connect(peer) == -1)
+	{
+	    if (errno != EINPROGRESS)
+		OnConnectFaild();
+	}
 
-        m_Event.m_WriteHandle = EventHandle(this, &NetConnector::OnConnected);
-        m_Service.AddEvent(m_Event, EVENT_WRITEABLE);
+	m_Event.m_WriteHandle = EventHandle(this, &NetConnector::OnConnected);
+	m_Service.AddEvent(m_Event, EVENT_WRITEABLE);
     }
 
-    void OnConnected(Event* ev)
+    void OnConnected(SocketEvent* ev)
     {
-	    if (m_Event.m_Socket.GetSockErr())
-	    {
-            OnConnectFaild();
-	    }
-	    else
-	    {
-            m_Service.DelEvent(m_Event, EVENT_WRITEABLE);
-            m_OnConnectedHandle(this);
-	    }
+	if (m_Event.m_Socket.GetSockErr())
+	{
+	    OnConnectFaild();
+	}
+	else
+	{
+	    m_Service.DelEvent(m_Event, EVENT_WRITEABLE);
+	    m_OnConnectedHandle(this);
+	}
     }
 
     void OnConnectFaild()
     {
-        Close();
-        m_OnConnectFaildHandle(this);
+	Close();
+	m_OnConnectFaildHandle(this);
     }
 
     void Close()
     {
-	    m_Event.m_Socket.Close();
+	m_Event.m_Socket.Close();
     }
 
     void BindConnected(ConnectorHandle& handle) { m_OnConnectedHandle = handle; }
@@ -63,7 +63,7 @@ public:
     NetSocket& GetSocket() { return m_Event.m_Socket; }
 
 private:
-    Event m_Event;
+    SocketEvent m_Event;
     NetService& m_Service;
     ConnectorHandle m_OnConnectedHandle;
     ConnectorHandle m_OnConnectFaildHandle;

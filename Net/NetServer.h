@@ -29,7 +29,7 @@ public:
         m_Acceptor.AddAcceptEvent(eventHandle);
     }
 
-    void OnAccept(Event* ev)
+    void OnAccept(SocketEvent* ev)
     {
         NetSocket sock;
         PeerAddr addr;
