@@ -79,16 +79,16 @@ class session
 	public function core_run()
 	{
 		$timeOut = $this->timer != null ? $this->timer->sleep_time() : 5;
-        $retVal = $this->core_process($timeOut);
+		$retVal = $this->core_process($timeOut);
 		if ($retVal === false)
 			return false;
-        if ($retVal === EVENT_CLOSE)
-        {
-            $this->socket->close();
-            call_user_func($this->connectBrokenHandle, $this);
-        }
-		
-        if ($this->timer != null)
+		if ($retVal === EVENT_CLOSE)
+		{
+			$this->socket->close();
+			call_user_func($this->connectBrokenHandle, $this);
+		}
+
+		if ($this->timer != null)
 			$this->timer->timer_run();
 
 		return true;
@@ -128,20 +128,20 @@ class session
 	{
 		$retVal = $this->socket->select($timeOut);
 		if ($retVal === false)
-			return false;
-        
-        if ($retVal & EVENT_RECV)
-				$retVal = $this->recv_process();
-        if ($retVal & EVENT_SEND)
-				$retVal &= $this->send_process();
+		return false;
 
-        return $retVal === false ? EVENT_CLOSE : true;
+		if ($retVal & EVENT_RECV)
+			$retVal = $this->recv_process();
+		if ($retVal & EVENT_SEND)
+			$retVal &= $this->send_process();
+
+		return $retVal === false ? EVENT_CLOSE : true;
 	}
 
 	private function send_process()
 	{
 		call_user_func($this->writeHandle, $this);
-        return $this->socket->send('', 0);
+		return $this->socket->send('', 0);
 	}
 
 	private function recv_process()
@@ -150,17 +150,17 @@ class session
 		{
 			$ret = $this->socket->recv(READ_BUFFER_SIZE);
 			if ($ret === false)
-            {
-                if ($this->socket->error() == EAGAIN)
-                        continue; 
+			{
+				if ($this->socket->error() == EAGAIN)
+					continue; 
 
 				return false;
-            }
+			}
 
-            $this->buffer = $this->buffer.$ret;
+		$this->buffer = $this->buffer.$ret;
 
-            if ($ret < READ_BUFFER_SIZE)
-            	break;
+		if ($ret < READ_BUFFER_SIZE)
+			break;
 		}
 
 		$useLen = call_user_func($this->readHandle, $this, $this->buffer);

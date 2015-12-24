@@ -9,7 +9,7 @@ class client
 	public function connect($ip, $port)
 	{
 		$this->session = new session();
-        $obj = $this;
+		$obj = $this;
 		$this->session->bind_connect_succ(function($session) use ($obj) { $obj->on_connect_succ($session); });
 		$this->session->bind_connect_faild(function($session) use ($obj) { $obj->on_connect_faild($session); });
 		$this->session->bind_connect_broken(function($session) use ($obj) { $obj->on_connect_broken($session); });
@@ -23,7 +23,7 @@ class client
 	public function on_connect_succ($session)
 	{
 		echo "connect success!\n";
-        $this->session->send("GET / HTTP 1.1 \r\n\r\n");
+		$this->session->send("GET / HTTP 1.1 \r\n\r\n");
 	}
 
 	public function on_connect_faild($session)
@@ -53,11 +53,11 @@ class client
 
 	public function run()
 	{
-        while(true)
-        {
-		    if($this->session->core_run() === false)
-                break;
-        }
+		while(true)
+		{
+			if($this->session->core_run() === false)
+			break;
+		}
 	}
 }
 

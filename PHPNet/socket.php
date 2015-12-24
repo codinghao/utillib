@@ -17,14 +17,14 @@ class socket
 	{
 		$this->handle = @socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 		if ($this->handle === false)
-        	return false;
+			return false;
 
 		$ret = @socket_connect($this->handle, $ip, $port);
 		if ($ret === false)
-        {
-            $this->close();
+		{
+			$this->close();
 			return false;
-        }
+		}
 
 		@socket_set_nonblock($this->handle);
 
@@ -36,22 +36,22 @@ class socket
 		if ($this->handle == null)
 			return false;
 
-        $this->buffer = $this->buffer.$buffer;
-        $leftLen = strlen($this->buffer);
-        
+		$this->buffer = $this->buffer.$buffer;
+		$leftLen = strlen($this->buffer);
+
 		while($leftLen > 0)
 		{
 			$ret = @socket_write($this->handle, $this->buffer, $leftLen);
 			if ($ret === false)
-            {
-                if ($this->error() == EAGAIN)
-                    continue;
+			{
+				if ($this->error() == EAGAIN)
+					continue;
 
 				return false;
-            }
+			}
 
 			$leftLen -= $ret;
-            $this->buffer = $leftLen > 0 ? substr($this->buffer, -$this->leftLen) : '';
+			$this->buffer = $leftLen > 0 ? substr($this->buffer, -$this->leftLen) : '';
 		}
 
 		return true;
@@ -80,20 +80,20 @@ class socket
 		if ($ret === false)
 			return false;
 
-	    $event = EVENT_NONE;	
+		$event = EVENT_NONE;	
 		if ($ret > 0 && !empty($read))
 			$event = $event | EVENT_RECV;
 
 		if ($ret > 0 && !empty($write))
 			$event = $event | EVENT_SEND;
 
-        return $event;
+		return $event;
 	}
 
-    public function error()
-    {
-        return @socket_last_error($this->handle);
-    }
+	public function error()
+	{
+		return @socket_last_error($this->handle);
+	}
 
 	public function close()
 	{
