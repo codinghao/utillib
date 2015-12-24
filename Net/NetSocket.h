@@ -49,6 +49,12 @@ public:
 	return sockErr;
     }
 
+    void ShutDown()
+    {
+        if (!Invalid())
+            shutdown(m_Handle);
+    }
+
     void Close()
     {
         if (!Invalid())
