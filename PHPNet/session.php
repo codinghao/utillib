@@ -157,10 +157,10 @@ class session
 				return false;
 			}
 
-		$this->buffer = $this->buffer.$ret;
+		    $this->buffer = $this->buffer.$ret;
 
-		if ($ret < READ_BUFFER_SIZE)
-			break;
+		    if ($ret < READ_BUFFER_SIZE)
+			    break;
 		}
 
 		$useLen = call_user_func($this->readHandle, $this, $this->buffer);
