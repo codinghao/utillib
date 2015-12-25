@@ -62,7 +62,7 @@ class client
 }
 
 $client = new client();
-$client->connect('127.0.0.1', 81);
+$client->connect('127.0.0.1', 88);
 $client->run();
 
 ?>

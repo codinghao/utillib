@@ -126,14 +126,16 @@ class session
 
 	private function core_process($timeOut)
 	{
-		$retVal = $this->socket->select($timeOut);
-		if ($retVal === false)
-		return false;
+		$event = $this->socket->select($timeOut);
+		if ($event === false)
+            return false;
 
-		if ($retVal & EVENT_RECV)
+        $retVal = true;
+
+		if ($event & EVENT_RECV)
 			$retVal = $this->recv_process();
-		if ($retVal & EVENT_SEND)
-			$retVal &= $this->send_process();
+		if ($event & EVENT_SEND)
+			$retVal = $retVal && $this->send_process();
 
 		return $retVal === false ? EVENT_CLOSE : true;
 	}
